@@ -1,6 +1,9 @@
 import axios from "axios";
 
-export const apiBaseUrl = "http://localhost:5005/v1";
+import axios from "axios";
+
+export const apiBaseUrl =
+  import.meta.env.VITE_API_URL || "http://localhost:5005/v1";
 
 const client = axios.create({
   baseURL: apiBaseUrl,
@@ -10,6 +13,8 @@ const client = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+// باقي الملف كما هو...
 
 const normalizeError = (err) => {
   const status = err?.response?.status ?? null;
