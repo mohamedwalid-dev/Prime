@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 export const apiBaseUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5005/v1";
+  import.meta.env.VITE_API_URL || "https://render-backend-gnhu.onrender.com/v1";
 
 const client = axios.create({
   baseURL: apiBaseUrl,
