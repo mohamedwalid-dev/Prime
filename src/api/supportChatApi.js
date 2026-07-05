@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5005/v1/support-chats";
+const API_URL = "https://render-backend-gnhu.onrender.com/v1/support-chats";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");

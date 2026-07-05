@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5005/v1/tickets";
+const API_BASE = "https://render-backend-gnhu.onrender.com/v1/tickets";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");

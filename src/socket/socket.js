@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const rawSocketUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
+const rawSocketUrl = import.meta.env.VITE_API_URL || "https://render-backend-gnhu.onrender.com/v1";
 const SOCKET_URL = rawSocketUrl.replace(/\/v1\/?$/, "").replace(/\/$/, "");
 
 const getSocketAuth = () => {
