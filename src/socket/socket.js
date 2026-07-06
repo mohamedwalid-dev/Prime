@@ -11,7 +11,6 @@ const getSocketAuth = () => {
 
 export const socket = io(SOCKET_URL, {
   auth: getSocketAuth(),
-  withCredentials: true,
   transports: ["websocket", "polling"],
   autoConnect: false,
 });

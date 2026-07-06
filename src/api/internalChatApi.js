@@ -1,7 +1,9 @@
+import { getAuthToken, handleUnauthorized } from "./client";
+
 const API_BASE = "https://render-backend-gnhu.onrender.com/v1/chats";
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
 
   return {
     "Content-Type": "application/json",
@@ -12,6 +14,10 @@ const getAuthHeaders = () => {
 const parseResponse = async (response) => {
   const payload = await response.json().catch(() => ({}));
 
+  if (response.status === 401) {
+    handleUnauthorized();
+  }
+
   if (!response.ok) {
     throw new Error(payload.message || payload.error || "Internal chat request failed");
   }
@@ -21,7 +27,6 @@ const parseResponse = async (response) => {
 
 const request = async (path = "", options = {}) => {
   const response = await fetch(`${API_BASE}${path}`, {
-    credentials: "include",
     ...options,
     headers: {
       ...getAuthHeaders(),

@@ -1,7 +1,9 @@
+import { getAuthToken, handleUnauthorized } from "../api/client";
+
 const API_URL = "https://render-backend-gnhu.onrender.com/v1/inventory";
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
 
   return {
     "Content-Type": "application/json",
@@ -11,6 +13,10 @@ const getAuthHeaders = () => {
 
 const parseResponse = async (response) => {
   const payload = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    handleUnauthorized();
+  }
 
   if (!response.ok) {
     throw new Error(
@@ -23,7 +29,6 @@ const parseResponse = async (response) => {
 
 const request = async (path = "", options = {}) => {
   const response = await fetch(`${API_URL}${path}`, {
-    credentials: "include",
     ...options,
     headers: {
       ...getAuthHeaders(),
@@ -61,12 +66,15 @@ export const createInventoryProduct = async (productData) => {
 export const updateInventoryProduct = async (productId, productData) => {
   const response = await fetch(`${API_URL}/${productId}`, {
     method: "PUT",
-    credentials: "include",
     headers: getAuthHeaders(),
     body: JSON.stringify(productData),
   });
 
   const payload = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    handleUnauthorized();
+  }
 
   if (!response.ok) {
     throw new Error(

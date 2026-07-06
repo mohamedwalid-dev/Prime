@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ENDPOINTS } from "../api/endpoints";
-import { http } from "../api/client";
+import { clearAuthStorage, getAuthToken, http } from "../api/client";
 
 const AuthContext = createContext(null);
 
@@ -13,16 +13,16 @@ const extractAuthPayload = (payload) => {
   };
 };
 
+const extractUserPayload = (payload) => {
+  if (payload?.user) return payload.user;
+  if (Array.isArray(payload?.data)) return payload.data[0] || null;
+  if (Object.prototype.hasOwnProperty.call(payload || {}, "data")) return payload.data || null;
+  return payload || null;
+};
+
 const persistAuth = ({ token, user }) => {
   if (token) localStorage.setItem("token", token);
   if (user) localStorage.setItem("user", JSON.stringify(user));
-};
-
-const clearAuthStorage = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  localStorage.removeItem("auth");
-  localStorage.removeItem("authUser");
 };
 
 export function AuthProvider({ children }) {
@@ -31,17 +31,21 @@ export function AuthProvider({ children }) {
 
   const checkAuth = useCallback(async () => {
     setLoading(true);
+
+    if (!getAuthToken()) {
+      setUser(null);
+      setLoading(false);
+      return { user: null, error: null, errorData: [] };
+    }
+
     const result = await http.get(ENDPOINTS.AUTH.ME);
     if (result.error) {
       setUser(null);
       setLoading(false);
       return { user: null, error: result.error, errorData: result.errorData ?? [] };
     }
-    // Backend returns { status: "success", data: [user], message: "..." }
-    // Extract first user from data array
-    const me = Array.isArray(result.data?.data) && result.data.data.length > 0 
-      ? result.data.data[0] 
-      : null;
+
+    const me = extractUserPayload(result.data);
     if (me) localStorage.setItem("user", JSON.stringify(me));
     setUser(me);
     setLoading(false);
@@ -57,6 +61,7 @@ export function AuthProvider({ children }) {
     if (result.error) return result;
     const authPayload = extractAuthPayload(result.data);
     persistAuth(authPayload);
+    if (authPayload.user) setUser(authPayload.user);
     // Re-check auth to get full user data
     await checkAuth();
     return result;
@@ -67,6 +72,7 @@ export function AuthProvider({ children }) {
     if (result.error) return result;
     const authPayload = extractAuthPayload(result.data);
     persistAuth(authPayload);
+    if (authPayload.user) setUser(authPayload.user);
     // Re-check auth to get full user data
     await checkAuth();
     return result;
